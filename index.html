@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sounds in a Blender</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        /* Custom styles for a fun, chunky look */
+        .flashcard {
+            border: 4px solid #4A5568; /* gray-700 */
+            box-shadow: 8px 8px 0px #4A5568;
+            transition: all 0.2s ease-in-out;
+            font-size: clamp(2rem, 12vw, 6rem); /* Responsive font size */
+        }
+        .btn-main {
+            transition: all 0.2s ease-in-out;
+            box-shadow: 6px 6px 0px #2D3748; /* gray-800 */
+            border: 4px solid #2D3748;
+        }
+        .btn-main:active {
+            transform: translate(4px, 4px);
+            box-shadow: 2px 2px 0px #2D3748;
+        }
+        .checkbox-label {
+            transition: all 0.2s ease-in-out;
+            border: 2px solid #CBD5E0; /* gray-300 */
+        }
+        .checkbox-label:has(input:checked) {
+            background-color: #38A169; /* green-600 */
+            color: white;
+            border-color: #2F855A; /* green-700 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-5xl mx-auto">
+
+        <!-- ============== SETUP SCREEN ============== -->
+        <div id="setup-screen" class="space-y-8">
+            <h1 class="text-4xl md:text-6xl font-bold text-center text-gray-700">Sounds in a Blender</h1>
+            
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border-2 border-gray-200">
+                <h2 class="text-2xl font-bold mb-4 text-center">1. Choose Your Patterns</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-lg">
+                    <!-- Consonant Digraphs -->
+                    <div class="flex items-center">
+                        <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                            <input type="checkbox" id="digraphs" class="hidden" checked> Consonant Digraphs (sh, ch...)
+                        </label>
+                    </div>
+                    <!-- Floss Pattern -->
+                    <div class="flex items-center">
+                        <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                            <input type="checkbox" id="floss" class="hidden"> Floss Pattern (ff, ll...)
+                        </label>
+                    </div>
+                    <!-- Long Consonant Spelling -->
+                    <div class="flex items-center">
+                        <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                            <input type="checkbox" id="longConsonants" class="hidden"> Long Consonants (ck, tch...)
+                        </label>
+                    </div>
+                    <!-- Initial Blends -->
+                    <div class="flex items-center">
+                        <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                            <input type="checkbox" id="initialBlends" class="hidden"> Initial Blends (br, cl...)
+                        </label>
+                    </div>
+                    <!-- Final Blends -->
+                    <div class="flex items-center">
+                        <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                            <input type="checkbox" id="finalBlends" class="hidden"> Final Blends (nt, st...)
+                        </label>
+                    </div>
+                     <!-- Silent -e -->
+                    <div class="flex items-center">
+                        <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                            <input type="checkbox" id="silentE" class="hidden"> Silent -e
+                        </label>
+                    </div>
+                     <!-- Long Vowels -->
+                     <div class="flex items-center col-span-1 sm:col-span-2 lg:col-span-3">
+                        <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                            <input type="checkbox" id="longVowels" class="hidden"> Long Vowel Teams (ai, ee...)
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border-2 border-gray-200">
+                 <h2 class="text-2xl font-bold mb-4 text-center">2. Choose Your Mode</h2>
+                 <div class="flex justify-center gap-4 text-xl">
+                    <label class="flex-1 p-4 rounded-lg cursor-pointer checkbox-label text-center">
+                        <input type="radio" name="mode" value="practice" class="hidden" checked> Practice
+                    </label>
+                    <label class="flex-1 p-4 rounded-lg cursor-pointer checkbox-label text-center">
+                        <input type="radio" name="mode" value="challenge" class="hidden"> Challenge
+                    </label>
+                 </div>
+            </div>
+
+            <button id="start-game-btn" class="w-full py-4 text-3xl font-bold text-white bg-green-600 rounded-xl btn-main hover:bg-green-700">Start Game</button>
+        </div>
+
+        <!-- ============== GAME SCREEN ============== -->
+        <div id="game-screen" class="hidden">
+            <div class="flex justify-end items-center gap-2 mb-2">
+                <button id="switch-to-challenge-btn" title="Switch to Challenge Mode" class="py-2 px-4 text-sm font-semibold text-white bg-orange-500 rounded-lg btn-main hover:bg-orange-600">Challenge Mode</button>
+                <button id="switch-to-practice-btn" title="Switch to Practice Mode" class="py-2 px-4 text-sm font-semibold text-white bg-teal-500 rounded-lg btn-main hover:bg-teal-600 hidden">Practice Mode</button>
+                <button id="back-to-menu-btn" title="Back to Menu" class="p-2 bg-gray-300 text-gray-700 rounded-lg btn-main hover:bg-gray-400">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </button>
+            </div>
+            <div id="challenge-header" class="hidden mb-4 text-center md:flex justify-between items-center text-3xl font-bold">
+                <div class="bg-white p-3 rounded-lg shadow-md border-2 border-gray-200">Time: <span id="timer">120</span>s</div>
+                <div class="bg-white p-3 rounded-lg shadow-md border-2 border-gray-200">High Score: <span id="high-score-display">0</span></div>
+                <div class="bg-white p-3 rounded-lg shadow-md border-2 border-gray-200">Score: <span id="current-score">0</span></div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-center font-bold">
+                <div id="box1" class="bg-yellow-200 text-yellow-800 rounded-2xl flex items-center justify-center aspect-square flashcard"></div>
+                <div id="box2" class="bg-blue-200 text-blue-800 rounded-2xl flex items-center justify-center aspect-square flashcard"></div>
+                <div id="box3" class="bg-pink-200 text-pink-800 rounded-2xl flex items-center justify-center aspect-square flashcard"></div>
+                <div id="box4" class="bg-purple-200 text-purple-800 rounded-2xl flex items-center justify-center aspect-square flashcard"></div>
+            </div>
+
+            <button id="next-word-btn" class="w-full mt-8 py-4 bg-blue-500 text-white rounded-xl btn-main hover:bg-blue-600 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- ============== GAME OVER SCREEN ============== -->
+        <div id="game-over-screen" class="hidden text-center space-y-6">
+            <h2 class="text-6xl font-bold text-red-500">Time's Up!</h2>
+            <div class="bg-white p-8 rounded-2xl shadow-lg border-2 border-gray-200 space-y-4">
+                <p class="text-3xl">Your Score: <span id="final-score" class="font-bold">0</span></p>
+                <p class="text-3xl">High Score: <span id="final-high-score" class="font-bold">0</span></p>
+            </div>
+            <button id="play-again-btn" class="w-full max-w-md mx-auto py-4 text-3xl font-bold text-white bg-green-600 rounded-xl btn-main hover:bg-green-700">Play Again</button>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM Elements
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const nextWordBtn = document.getElementById('next-word-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const backToMenuBtn = document.getElementById('back-to-menu-btn');
+        const switchToChallengeBtn = document.getElementById('switch-to-challenge-btn');
+        const switchToPracticeBtn = document.getElementById('switch-to-practice-btn');
+
+        // Game Settings Elements
+        const settings = {
+            digraphs: document.getElementById('digraphs'),
+            floss: document.getElementById('floss'),
+            longConsonants: document.getElementById('longConsonants'),
+            initialBlends: document.getElementById('initialBlends'),
+            finalBlends: document.getElementById('finalBlends'),
+            silentE: document.getElementById('silentE'),
+            longVowels: document.getElementById('longVowels'),
+            getMode: () => document.querySelector('input[name="mode"]:checked').value,
+        };
+
+        // Game Display Elements
+        const boxes = [
+            document.getElementById('box1'),
+            document.getElementById('box2'),
+            document.getElementById('box3'),
+            document.getElementById('box4')
+        ];
+
+        // Challenge Mode Elements
+        const challengeHeader = document.getElementById('challenge-header');
+        const timerDisplay = document.getElementById('timer');
+        const highScoreDisplay = document.getElementById('high-score-display');
+        const currentScoreDisplay = document.getElementById('current-score');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const finalHighScoreDisplay = document.getElementById('final-high-score');
+
+        // Phonetic Patterns Data
+        const patterns = {
+            consonants: ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'],
+            qu: ['qu'],
+            vowels: ['a', 'e', 'i', 'o', 'u'],
+            digraphs: ['sh', 'ch', 'th', 'wh', 'ph', 'ng'],
+            floss: ['ff', 'll', 'ss', 'zz'],
+            longConsonants: ['ck', 'tch', 'dge'],
+            initialBlends: ['br', 'bl', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'pr', 'pl', 'sw', 'sm', 'spl', 'tr'],
+            finalBlends: ['nt', 'rt', 'st', 'pt', 'mp'],
+            longVowels: ['ai', 'ee', 'ea', 'ou'],
+        };
+
+        // Game State
+        let gameState = {
+            mode: 'practice',
+            score: 0,
+            timeLeft: 120,
+            timerId: null,
+            highScore: localStorage.getItem('soundsInABlenderHighScore') || 0,
+            activePatterns: {}
+        };
+
+        // Utility Function
+        const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+        // Core Game Logic
+        function generateWord() {
+            // Build pools based on selected patterns
+            const pool1 = [...patterns.consonants.filter(c => c !== 'x'), ...patterns.qu];
+            // NEW RULE: Exclude 'ng' from the initial digraphs for box 1
+            if (gameState.activePatterns.digraphs) pool1.push(...patterns.digraphs.filter(d => d !== 'ng'));
+            if (gameState.activePatterns.initialBlends) pool1.push(...patterns.initialBlends);
+
+            const pool2 = [...patterns.vowels];
+            if (gameState.activePatterns.longVowels) pool2.push(...patterns.longVowels);
+            
+            // Generate parts for box 1 and 2
+            const part1 = getRandomElement(pool1);
+            const part2 = getRandomElement(pool2);
+            
+            // NEW: Define consonants for box 3, excluding 'y', 'w', 'h', and 'j'
+            const consonantsForPool3 = patterns.consonants.filter(c => c !== 'y' && c !== 'w' && c !== 'h' && c !== 'j');
+
+            // Build the complete potential pool for box 3
+            const isLongVowel = patterns.longVowels.includes(part2);
+            const baseConsonantsForPool3 = isLongVowel 
+                ? consonantsForPool3.filter(c => c !== 'r') 
+                : consonantsForPool3;
+
+            const pool3 = [...baseConsonantsForPool3];
+            // NEW RULE: Add 'ng' to box 3 pool if digraphs are enabled
+            if (gameState.activePatterns.digraphs) {
+                pool3.push('ng');
+            }
+            // NEW RULE: Don't add floss patterns if there's a long vowel
+            if (gameState.activePatterns.floss && !isLongVowel) {
+                pool3.push(...patterns.floss);
+            }
+            // NEW RULE: Don't add long consonants if there's a long vowel
+            if (gameState.activePatterns.longConsonants && !isLongVowel) {
+                pool3.push(...patterns.longConsonants);
+            }
+            
+            if (gameState.activePatterns.finalBlends) {
+                let finalBlendsToAdd = patterns.finalBlends;
+                if (isLongVowel) {
+                    // NEW RULE: Exclude rt, mp, and pt after long vowels
+                    finalBlendsToAdd = finalBlendsToAdd.filter(blend => !['rt', 'mp', 'pt'].includes(blend));
+                }
+                pool3.push(...finalBlendsToAdd);
+            }
+
+            let part3 = '';
+            let part4 = '';
+
+            // Decide UPFRONT if we are attempting a silent 'e' word.
+            // This allows us to correctly apply phonics rules.
+            const attemptSilentE = gameState.activePatterns.silentE && patterns.vowels.includes(part2) && Math.random() < 0.4;
+
+            if (attemptSilentE) {
+                // If we're making a silent 'e' word, part3 MUST be a single consonant.
+                const singleConsonantPool = pool3.filter(p => consonantsForPool3.includes(p));
+                if (singleConsonantPool.length > 0) {
+                    part3 = getRandomElement(singleConsonantPool);
+                    part4 = 'e';
+                }
+            }
+            
+            // If we haven't determined the word parts yet (either because we didn't try for a silent 'e' or couldn't find a suitable consonant)...
+            if (part3 === '') {
+                 // NEW RULE: Exclude single f, l, s, z, c, and v because we are NOT using a silent 'e'.
+                const safePool3 = pool3.filter(p => !['f', 'l', 's', 'z', 'c', 'v'].includes(p));
+                
+                if (safePool3.length > 0) {
+                    part3 = getRandomElement(safePool3);
+                } else if (pool3.length > 0) {
+                    // Fallback in the unlikely case that filtering left an empty pool
+                    part3 = getRandomElement(pool3);
+                }
+                part4 = '';
+            }
+
+            // Display parts in boxes
+            boxes[0].textContent = part1;
+            boxes[1].textContent = part2;
+            boxes[2].textContent = part3;
+            boxes[3].textContent = part4;
+        }
+
+        function updateScore() {
+            if (gameState.mode === 'challenge') {
+                gameState.score++;
+                currentScoreDisplay.textContent = gameState.score;
+            }
+        }
+
+        function nextWord() {
+            generateWord();
+            updateScore();
+        }
+
+        function startTimer() {
+            gameState.timeLeft = 120;
+            timerDisplay.textContent = gameState.timeLeft;
+            gameState.timerId = setInterval(() => {
+                gameState.timeLeft--;
+                timerDisplay.textContent = gameState.timeLeft;
+                if (gameState.timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function startGame() {
+            // 1. Capture settings
+            gameState.mode = settings.getMode();
+            gameState.activePatterns = {
+                digraphs: settings.digraphs.checked,
+                floss: settings.floss.checked,
+                longConsonants: settings.longConsonants.checked,
+                initialBlends: settings.initialBlends.checked,
+                finalBlends: settings.finalBlends.checked,
+                silentE: settings.silentE.checked,
+                longVowels: settings.longVowels.checked,
+            };
+
+            // 2. Reset score and timer
+            gameState.score = 0;
+            clearInterval(gameState.timerId);
+
+            // 3. UI updates
+            setupScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+
+            if (gameState.mode === 'challenge') {
+                challengeHeader.classList.remove('hidden');
+            challengeHeader.classList.add('flex'); // re-add flex for proper layout
+            highScoreDisplay.textContent = gameState.highScore;
+            currentScoreDisplay.textContent = gameState.score;
+            startTimer();
+            switchToChallengeBtn.classList.add('hidden');
+            switchToPracticeBtn.classList.remove('hidden');
+        } else {
+            challengeHeader.classList.add('hidden');
+            switchToChallengeBtn.classList.remove('hidden');
+            switchToPracticeBtn.classList.add('hidden');
+        }
+
+        // 4. Generate first word
+        generateWord();
+        }
+        
+        function endGame() {
+            clearInterval(gameState.timerId);
+
+            // Update high score if needed
+            if (gameState.score > gameState.highScore) {
+                gameState.highScore = gameState.score;
+                localStorage.setItem('soundsInABlenderHighScore', gameState.highScore);
+            }
+
+            // Update display
+            finalScoreDisplay.textContent = gameState.score;
+            finalHighScoreDisplay.textContent = gameState.highScore;
+
+            // Switch screens
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        function resetToSetup() {
+            gameOverScreen.classList.add('hidden');
+            setupScreen.classList.remove('hidden');
+        }
+
+        function backToMenu() {
+            clearInterval(gameState.timerId);
+            gameScreen.classList.add('hidden');
+            setupScreen.classList.remove('hidden');
+        }
+
+        function switchMode(newMode) {
+            clearInterval(gameState.timerId);
+            // Set the radio button on the setup screen so startGame() picks it up
+            document.querySelector(`input[name="mode"][value="${newMode}"]`).checked = true;
+            startGame();
+        }
+
+        // Event Listeners
+        startGameBtn.addEventListener('click', startGame);
+        nextWordBtn.addEventListener('click', nextWord);
+        playAgainBtn.addEventListener('click', resetToSetup);
+        backToMenuBtn.addEventListener('click', backToMenu);
+        switchToChallengeBtn.addEventListener('click', () => switchMode('challenge'));
+        switchToPracticeBtn.addEventListener('click', () => switchMode('practice'));
+
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
