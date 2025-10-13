@@ -206,6 +206,12 @@
             longVowels: ['ai', 'ee', 'ea', 'ou'],
         };
 
+        // Filter for inappropriate combinations
+        const forbiddenCombinations = [
+            'f-u-ck', 'sh-i-t', 'c-o-ck', 'd-i-ck', 'p-i-ss', 'c-u-nt',
+            'b-i-tch', 'a-ss', 's-l-u-t', 'r-a-p-e', 'r-ai-p', 'wh-o-r-e'
+        ];
+
         // Game State
         let gameState = {
             mode: 'practice',
@@ -221,80 +227,79 @@
 
         // Core Game Logic
         function generateWord() {
-            // Build pools based on selected patterns
-            const pool1 = [...patterns.consonants.filter(c => c !== 'x'), ...patterns.qu];
-            // NEW RULE: Exclude 'ng' from the initial digraphs for box 1
-            if (gameState.activePatterns.digraphs) pool1.push(...patterns.digraphs.filter(d => d !== 'ng'));
-            if (gameState.activePatterns.initialBlends) pool1.push(...patterns.initialBlends);
+            let part1, part2, part3, part4;
+            let currentCombination;
 
-            const pool2 = [...patterns.vowels];
-            if (gameState.activePatterns.longVowels) pool2.push(...patterns.longVowels);
-            
-            // Generate parts for box 1 and 2
-            const part1 = getRandomElement(pool1);
-            const part2 = getRandomElement(pool2);
-            
-            // NEW: Define consonants for box 3, excluding 'y', 'w', 'h', and 'j'
-            const consonantsForPool3 = patterns.consonants.filter(c => c !== 'y' && c !== 'w' && c !== 'h' && c !== 'j');
+            do {
+                // Build pools based on selected patterns
+                const pool1 = [...patterns.consonants.filter(c => c !== 'x'), ...patterns.qu];
+                if (gameState.activePatterns.digraphs) pool1.push(...patterns.digraphs.filter(d => d !== 'ng'));
+                if (gameState.activePatterns.initialBlends) pool1.push(...patterns.initialBlends);
 
-            // Build the complete potential pool for box 3
-            const isLongVowel = patterns.longVowels.includes(part2);
-            const baseConsonantsForPool3 = isLongVowel 
-                ? consonantsForPool3.filter(c => c !== 'r') 
-                : consonantsForPool3;
-
-            const pool3 = [...baseConsonantsForPool3];
-            // NEW RULE: Add 'ng' to box 3 pool if digraphs are enabled
-            if (gameState.activePatterns.digraphs) {
-                pool3.push('ng');
-            }
-            // NEW RULE: Don't add floss patterns if there's a long vowel
-            if (gameState.activePatterns.floss && !isLongVowel) {
-                pool3.push(...patterns.floss);
-            }
-            // NEW RULE: Don't add long consonants if there's a long vowel
-            if (gameState.activePatterns.longConsonants && !isLongVowel) {
-                pool3.push(...patterns.longConsonants);
-            }
-            
-            if (gameState.activePatterns.finalBlends) {
-                let finalBlendsToAdd = patterns.finalBlends;
-                if (isLongVowel) {
-                    // NEW RULE: Exclude rt, mp, and pt after long vowels
-                    finalBlendsToAdd = finalBlendsToAdd.filter(blend => !['rt', 'mp', 'pt'].includes(blend));
-                }
-                pool3.push(...finalBlendsToAdd);
-            }
-
-            let part3 = '';
-            let part4 = '';
-
-            // Decide UPFRONT if we are attempting a silent 'e' word.
-            // This allows us to correctly apply phonics rules.
-            const attemptSilentE = gameState.activePatterns.silentE && patterns.vowels.includes(part2) && Math.random() < 0.4;
-
-            if (attemptSilentE) {
-                // If we're making a silent 'e' word, part3 MUST be a single consonant.
-                const singleConsonantPool = pool3.filter(p => consonantsForPool3.includes(p));
-                if (singleConsonantPool.length > 0) {
-                    part3 = getRandomElement(singleConsonantPool);
-                    part4 = 'e';
-                }
-            }
-            
-            // If we haven't determined the word parts yet (either because we didn't try for a silent 'e' or couldn't find a suitable consonant)...
-            if (part3 === '') {
-                 // NEW RULE: Exclude single f, l, s, z, c, and v because we are NOT using a silent 'e'.
-                const safePool3 = pool3.filter(p => !['f', 'l', 's', 'z', 'c', 'v'].includes(p));
+                const pool2 = [...patterns.vowels];
+                if (gameState.activePatterns.longVowels) pool2.push(...patterns.longVowels);
                 
-                if (safePool3.length > 0) {
-                    part3 = getRandomElement(safePool3);
-                } else if (pool3.length > 0) {
-                    // Fallback in the unlikely case that filtering left an empty pool
-                    part3 = getRandomElement(pool3);
+                // Generate parts for box 1 and 2
+                part1 = getRandomElement(pool1);
+                part2 = getRandomElement(pool2);
+                
+                // NEW: Define consonants for box 3, excluding 'y', 'w', 'h', 'j', and 'r'
+                const consonantsForPool3 = patterns.consonants.filter(c => c !== 'y' && c !== 'w' && c !== 'h' && c !== 'j' && c !== 'r');
+
+                // Build the complete potential pool for box 3
+                const isLongVowel = patterns.longVowels.includes(part2);
+                const baseConsonantsForPool3 = consonantsForPool3; // 'r' is already removed, so no conditional filtering needed here
+
+                const pool3 = [...baseConsonantsForPool3];
+                if (gameState.activePatterns.digraphs) {
+                    pool3.push('ng');
                 }
+                if (gameState.activePatterns.floss && !isLongVowel) {
+                    pool3.push(...patterns.floss);
+                }
+                if (gameState.activePatterns.longConsonants && !isLongVowel) {
+                    pool3.push(...patterns.longConsonants);
+                }
+                
+                if (gameState.activePatterns.finalBlends) {
+                    let finalBlendsToAdd = patterns.finalBlends;
+                    // 'rt' will be naturally excluded if 'r' is not a consonant option for blends, but we can be explicit.
+                    if (isLongVowel) {
+                        finalBlendsToAdd = finalBlendsToAdd.filter(blend => !['rt', 'mp', 'pt'].includes(blend));
+                    }
+                    // Also filter out 'rt' completely as 'r' is no longer in box 3.
+                    finalBlendsToAdd = finalBlendsToAdd.filter(blend => blend !== 'rt');
+                    pool3.push(...finalBlendsToAdd);
+                }
+
+                part3 = '';
                 part4 = '';
-            }
+
+                // Decide UPFRONT if we are attempting a silent 'e' word.
+                const attemptSilentE = gameState.activePatterns.silentE && patterns.vowels.includes(part2) && Math.random() < 0.4;
+
+                if (attemptSilentE) {
+                    const singleConsonantPool = pool3.filter(p => consonantsForPool3.includes(p));
+                    if (singleConsonantPool.length > 0) {
+                        part3 = getRandomElement(singleConsonantPool);
+                        part4 = 'e';
+                    }
+                }
+                
+                if (part3 === '') {
+                    const safePool3 = pool3.filter(p => !['f', 'l', 's', 'z', 'c', 'v'].includes(p));
+                    if (safePool3.length > 0) {
+                        part3 = getRandomElement(safePool3);
+                    } else if (pool3.length > 0) {
+                        part3 = getRandomElement(pool3);
+                    }
+                    part4 = '';
+                }
+
+                currentCombination = [part1, part2, part3, part4].filter(Boolean).join('-');
+
+            } while (forbiddenCombinations.includes(currentCombination));
+
 
             // Display parts in boxes
             boxes[0].textContent = part1;
@@ -414,6 +419,7 @@
     </script>
 </body>
 </html>
+
 
 
 
