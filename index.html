@@ -208,8 +208,8 @@
 
         // Filter for inappropriate combinations
         const forbiddenCombinations = [
-            'f-u-ck', 'sh-i-t', 'c-o-ck', 'd-i-ck', 'p-i-ss', 'c-u-nt', d-i-k,
-            'b-i-tch', 'a-ss', 's-l-u-t', 'r-a-p-e', 'r-ai-p', 'wh-o-r-e', 'b-i-ch'
+            'f-u-ck', 'sh-i-t', 'c-o-ck', 'd-i-ck', 'p-i-ss', 'c-u-nt',
+            'b-i-tch', 'a-ss', 's-l-u-t', 'r-a-p-e', 'r-ai-p', 'wh-o-r-e'
         ];
 
         // Game State
@@ -233,7 +233,7 @@
             do {
                 // Build pools based on selected patterns
                 const pool1 = [...patterns.consonants.filter(c => c !== 'x'), ...patterns.qu];
-                if (gameState.activePatterns.digraphs) pool1.push(...patterns.digraphs.filter(d => d !== 'ng'));
+                if (gameState.activePatterns.digraphs) pool1.push(...patterns.digraphs.filter(digraph => digraph !== 'ng'));
                 if (gameState.activePatterns.initialBlends) pool1.push(...patterns.initialBlends);
 
                 const pool2 = [...patterns.vowels];
@@ -419,6 +419,7 @@
     </script>
 </body>
 </html>
+
 
 
 
