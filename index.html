@@ -37,15 +37,33 @@
             color: white;
             border-color: #2F855A; /* green-700 */
         }
+        /* New style for game mode buttons */
+        .game-mode-btn {
+            font-size: clamp(2rem, 8vw, 4rem);
+            padding: 2rem 1rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
 
     <div id="app-container" class="w-full max-w-5xl mx-auto">
 
-        <!-- ============== SETUP SCREEN ============== -->
-        <div id="setup-screen" class="space-y-8">
+        <!-- ============== INITIAL GAME MODE SCREEN ============== -->
+        <div id="game-mode-screen" class="space-y-8">
             <h1 class="text-4xl md:text-6xl font-bold text-center text-gray-700">Sounds in a Blender</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <button id="select-sounds-game-btn" class="w-full text-center font-bold text-white bg-blue-500 rounded-2xl btn-main hover:bg-blue-600 game-mode-btn">
+                    Sounds
+                </button>
+                <button id="select-words-game-btn" class="w-full text-center font-bold text-white bg-green-600 rounded-2xl btn-main hover:bg-green-700 game-mode-btn">
+                    Words
+                </button>
+            </div>
+        </div>
+
+        <!-- ============== WORD SETUP SCREEN (Replaces old 'setup-screen') ============== -->
+        <div id="word-setup-screen" class="hidden space-y-8">
+            <h1 class="text-4xl md:text-6xl font-bold text-center text-gray-700">Word Blender</h1>
             
             <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border-2 border-gray-200">
                 <h2 class="text-2xl font-bold mb-4 text-center">1. Choose Your Patterns</h2>
@@ -99,15 +117,57 @@
                  <h2 class="text-2xl font-bold mb-4 text-center">2. Choose Your Mode</h2>
                  <div class="flex justify-center gap-4 text-xl">
                     <label class="flex-1 p-4 rounded-lg cursor-pointer checkbox-label text-center">
-                        <input type="radio" name="mode" value="practice" class="hidden" checked> Practice
+                        <input type="radio" name="word-mode" value="practice" class="hidden" checked> Practice
                     </label>
                     <label class="flex-1 p-4 rounded-lg cursor-pointer checkbox-label text-center">
-                        <input type="radio" name="mode" value="challenge" class="hidden"> Challenge
+                        <input type="radio" name="word-mode" value="challenge" class="hidden"> Challenge
                     </label>
                  </div>
             </div>
+            <!-- Renamed button ID -->
+            <button id="start-word-game-btn" class="w-full py-4 text-3xl font-bold text-white bg-green-600 rounded-xl btn-main hover:bg-green-700">Start Game</button>
+        </div>
 
-            <button id="start-game-btn" class="w-full py-4 text-3xl font-bold text-white bg-green-600 rounded-xl btn-main hover:bg-green-700">Start Game</button>
+        <!-- ============== SOUND SETUP SCREEN (New Screen) ============== -->
+        <div id="sound-setup-screen" class="hidden space-y-8">
+            <h1 class="text-4xl md:text-6xl font-bold text-center text-gray-700">Sound Flashcards</h1>
+            
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border-2 border-gray-200">
+                <h2 class="text-2xl font-bold mb-4 text-center">1. Choose Your Sounds</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-lg">
+                    <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                        <input type="checkbox" id="sound-bdpq" class="hidden" checked> b / d / p / q
+                    </label>
+                    <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                        <input type="checkbox" id="sound-consonants" class="hidden" checked> Single Consonants
+                    </label>
+                    <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                        <input type="checkbox" id="sound-shortVowels" class="hidden" checked> Short Vowels
+                    </label>
+                    <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                        <input type="checkbox" id="sound-commonLongVowels" class="hidden"> Common Long Vowels (ai, igh...)
+                    </label>
+                    <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                        <input type="checkbox" id="sound-rControlled" class="hidden"> R-Controlled (ar, or...)
+                    </label>
+                    <label class="w-full p-4 rounded-lg cursor-pointer checkbox-label">
+                        <input type="checkbox" id="sound-lessCommonVowels" class="hidden"> Less Common Vowels (oo, ew...)
+                    </label>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border-2 border-gray-200">
+                 <h2 class="text-2xl font-bold mb-4 text-center">2. Choose Your Mode</h2>
+                 <div class="flex justify-center gap-4 text-xl">
+                    <label class="flex-1 p-4 rounded-lg cursor-pointer checkbox-label text-center">
+                        <input type="radio" name="sound-mode" value="practice" class="hidden" checked> Practice
+                    </label>
+                    <label class="flex-1 p-4 rounded-lg cursor-pointer checkbox-label text-center">
+                        <input type="radio" name="sound-mode" value="challenge" class="hidden"> Challenge
+                    </label>
+                 </div>
+            </div>
+            <button id="start-sound-game-btn" class="w-full py-4 text-3xl font-bold text-white bg-blue-600 rounded-xl btn-main hover:bg-blue-700">Start Game</button>
         </div>
 
         <!-- ============== GAME SCREEN ============== -->
@@ -127,14 +187,16 @@
                 <div class="bg-white p-3 rounded-lg shadow-md border-2 border-gray-200">Score: <span id="current-score">0</span></div>
             </div>
             
-            <div class="grid grid-cols-4 gap-2 md:gap-4 text-center font-bold">
+            <!-- Game Boxes Container -->
+            <div id="game-boxes-container" class="grid grid-cols-4 gap-2 md:gap-4 text-center font-bold">
                 <div id="box1" class="bg-yellow-200 text-yellow-800 rounded-2xl flex items-center justify-center aspect-square flashcard"></div>
                 <div id="box2" class="bg-blue-200 text-blue-800 rounded-2xl flex items-center justify-center aspect-square flashcard"></div>
                 <div id="box3" class="bg-pink-200 text-pink-800 rounded-2xl flex items-center justify-center aspect-square flashcard"></div>
                 <div id="box4" class="bg-purple-200 text-purple-800 rounded-2xl flex items-center justify-center aspect-square flashcard"></div>
             </div>
 
-            <button id="next-word-btn" class="w-full mt-8 py-4 bg-blue-500 text-white rounded-xl btn-main hover:bg-blue-600 flex items-center justify-center">
+            <!-- Renamed button ID -->
+            <button id="next-btn" class="w-full mt-8 py-4 bg-blue-500 text-white rounded-xl btn-main hover:bg-blue-600 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
@@ -155,18 +217,25 @@
 
     <script>
         // DOM Elements
-        const setupScreen = document.getElementById('setup-screen');
+        const gameModeScreen = document.getElementById('game-mode-screen');
+        const wordSetupScreen = document.getElementById('word-setup-screen');
+        const soundSetupScreen = document.getElementById('sound-setup-screen');
         const gameScreen = document.getElementById('game-screen');
         const gameOverScreen = document.getElementById('game-over-screen');
-        const startGameBtn = document.getElementById('start-game-btn');
-        const nextWordBtn = document.getElementById('next-word-btn');
+        
+        // Buttons
+        const selectSoundsGameBtn = document.getElementById('select-sounds-game-btn');
+        const selectWordsGameBtn = document.getElementById('select-words-game-btn');
+        const startWordGameBtn = document.getElementById('start-word-game-btn');
+        const startSoundGameBtn = document.getElementById('start-sound-game-btn');
+        const nextBtn = document.getElementById('next-btn');
         const playAgainBtn = document.getElementById('play-again-btn');
         const backToMenuBtn = document.getElementById('back-to-menu-btn');
         const switchToChallengeBtn = document.getElementById('switch-to-challenge-btn');
         const switchToPracticeBtn = document.getElementById('switch-to-practice-btn');
 
         // Game Settings Elements
-        const settings = {
+        const wordSettings = {
             digraphs: document.getElementById('digraphs'),
             floss: document.getElementById('floss'),
             longConsonants: document.getElementById('longConsonants'),
@@ -174,10 +243,21 @@
             finalBlends: document.getElementById('finalBlends'),
             silentE: document.getElementById('silentE'),
             longVowels: document.getElementById('longVowels'),
-            getMode: () => document.querySelector('input[name="mode"]:checked').value,
+            getMode: () => document.querySelector('input[name="word-mode"]:checked').value,
+        };
+
+        const soundSettings = {
+            bdpq: document.getElementById('sound-bdpq'),
+            consonants: document.getElementById('sound-consonants'),
+            shortVowels: document.getElementById('sound-shortVowels'),
+            commonLongVowels: document.getElementById('sound-commonLongVowels'),
+            rControlled: document.getElementById('sound-rControlled'),
+            lessCommonVowels: document.getElementById('sound-lessCommonVowels'),
+            getMode: () => document.querySelector('input[name="sound-mode"]:checked').value,
         };
 
         // Game Display Elements
+        const gameBoxesContainer = document.getElementById('game-boxes-container');
         const boxes = [
             document.getElementById('box1'),
             document.getElementById('box2'),
@@ -195,6 +275,7 @@
 
         // Phonetic Patterns Data
         const patterns = {
+            // Word game patterns
             consonants: ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'],
             qu: ['qu'],
             vowels: ['a', 'e', 'i', 'o', 'u'],
@@ -204,6 +285,14 @@
             initialBlends: ['br', 'bl', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'pr', 'pl', 'sw', 'sm', 'spl', 'tr'],
             finalBlends: ['nt', 'rt', 'st', 'pt', 'mp'],
             longVowels: ['ai', 'ee', 'ea', 'ou'],
+            
+            // Sound game patterns
+            sound_bdpq: ['b', 'd', 'p', 'q'],
+            sound_consonants: ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'],
+            sound_shortVowels: ['a', 'e', 'i', 'o', 'u'],
+            sound_commonLongVowels: ['ai', 'ay', 'ee', 'ea', 'ou', 'ow', 'igh', 'oi', 'oy'],
+            sound_rControlled: ['ar', 'er', 'ir', 'ur', 'or'],
+            sound_lessCommonVowels: ['oo', 'ea', 'ey', 'y', 'ie', 'oe', 'ew', 'ue']
         };
 
         // Filter for inappropriate combinations
@@ -214,60 +303,91 @@
 
         // Game State
         let gameState = {
+            gameType: 'words', // 'words' or 'sounds'
             mode: 'practice',
             score: 0,
             timeLeft: 120,
             timerId: null,
-            highScore: localStorage.getItem('soundsInABlenderHighScore') || 0,
-            activePatterns: {}
+            highScore: 0,
+            activeWordPatterns: {},
+            activeSoundPool: []
         };
 
         // Utility Function
         const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-        // Core Game Logic
-        function generateWord() {
+        // Core Game Logic: SOUNDS
+        function generateSound() {
+            if (gameState.activeSoundPool.length === 0) {
+                // Show a message if no sounds are selected
+                boxes.forEach(box => box.classList.add('hidden'));
+                boxes[0].classList.remove('hidden');
+                boxes[0].textContent = '...';
+                return;
+            }
+            
+            const sound = getRandomElement(gameState.activeSoundPool);
+            
+            // Display the sound in a random box for variety
+            const randomBoxIndex = Math.floor(Math.random() * boxes.length);
+            
+            // Clear all boxes and hide them
+            boxes.forEach((box, index) => {
+                box.textContent = '';
+                if (index !== randomBoxIndex) {
+                    box.classList.add('hidden');
+                } else {
+                    // Show and populate the chosen box
+                    box.classList.remove('hidden');
+                    box.textContent = sound;
+                }
+            });
+        }
+
+        // Core Game Logic: WORDS
+        function generateWordBlend() {
             let part1, part2, part3, part4;
             let currentCombination;
+
+            // Ensure boxes are visible
+            boxes.forEach(box => box.classList.remove('hidden'));
 
             do {
                 // Build pools based on selected patterns
                 const pool1 = [...patterns.consonants.filter(c => c !== 'x'), ...patterns.qu];
-                if (gameState.activePatterns.digraphs) pool1.push(...patterns.digraphs.filter(digraph => digraph !== 'ng'));
-                if (gameState.activePatterns.initialBlends) pool1.push(...patterns.initialBlends);
+                if (gameState.activeWordPatterns.digraphs) pool1.push(...patterns.digraphs.filter(digraph => digraph !== 'ng'));
+                if (gameState.activeWordPatterns.initialBlends) pool1.push(...patterns.initialBlends);
 
                 const pool2 = [...patterns.vowels];
-                if (gameState.activePatterns.longVowels) pool2.push(...patterns.longVowels);
+                if (gameState.activeWordPatterns.longVowels) pool2.push(...patterns.longVowels);
                 
                 // Generate parts for box 1 and 2
                 part1 = getRandomElement(pool1);
                 part2 = getRandomElement(pool2);
                 
-                // NEW: Define consonants for box 3, excluding 'y', 'w', 'h', 'j', and 'r'
+                // Define consonants for box 3, excluding 'y', 'w', 'h', 'j', and 'r'
                 const consonantsForPool3 = patterns.consonants.filter(c => c !== 'y' && c !== 'w' && c !== 'h' && c !== 'j' && c !== 'r');
 
                 // Build the complete potential pool for box 3
                 const isLongVowel = patterns.longVowels.includes(part2);
-                const baseConsonantsForPool3 = consonantsForPool3; // 'r' is already removed, so no conditional filtering needed here
+                const baseConsonantsForPool3 = consonantsForPool3; 
 
                 const pool3 = [...baseConsonantsForPool3];
-                if (gameState.activePatterns.digraphs) {
+                if (gameState.activeWordPatterns.digraphs) {
                     pool3.push('ng');
                 }
-                if (gameState.activePatterns.floss && !isLongVowel) {
+                if (gameState.activeWordPatterns.floss && !isLongVowel) {
                     pool3.push(...patterns.floss);
                 }
-                if (gameState.activePatterns.longConsonants && !isLongVowel) {
+                if (gameState.activeWordPatterns.longConsonants && !isLongVowel) {
                     pool3.push(...patterns.longConsonants);
                 }
                 
-                if (gameState.activePatterns.finalBlends) {
+                if (gameState.activeWordPatterns.finalBlends) {
                     let finalBlendsToAdd = patterns.finalBlends;
-                    // 'rt' will be naturally excluded if 'r' is not a consonant option for blends, but we can be explicit.
                     if (isLongVowel) {
                         finalBlendsToAdd = finalBlendsToAdd.filter(blend => !['rt', 'mp', 'pt'].includes(blend));
                     }
-                    // Also filter out 'rt' completely as 'r' is no longer in box 3.
                     finalBlendsToAdd = finalBlendsToAdd.filter(blend => blend !== 'rt');
                     pool3.push(...finalBlendsToAdd);
                 }
@@ -275,8 +395,7 @@
                 part3 = '';
                 part4 = '';
 
-                // Decide UPFRONT if we are attempting a silent 'e' word.
-                const attemptSilentE = gameState.activePatterns.silentE && patterns.vowels.includes(part2) && Math.random() < 0.4;
+                const attemptSilentE = gameState.activeWordPatterns.silentE && patterns.vowels.includes(part2) && Math.random() < 0.4;
 
                 if (attemptSilentE) {
                     const singleConsonantPool = pool3.filter(p => consonantsForPool3.includes(p));
@@ -291,15 +410,20 @@
                     if (safePool3.length > 0) {
                         part3 = getRandomElement(safePool3);
                     } else if (pool3.length > 0) {
-                        part3 = getRandomElement(pool3);
+                        // Fallback in case filter removes all options
+                        part3 = getRandomElement(pool3.filter(p => p)); // Ensure no undefined
                     }
                     part4 = '';
                 }
 
+                // Handle potential undefined parts if pools are empty
+                part1 = part1 || '';
+                part2 = part2 || '';
+                part3 = part3 || '';
+
                 currentCombination = [part1, part2, part3, part4].filter(Boolean).join('-');
 
             } while (forbiddenCombinations.includes(currentCombination));
-
 
             // Display parts in boxes
             boxes[0].textContent = part1;
@@ -308,16 +432,22 @@
             boxes[3].textContent = part4;
         }
 
+        // --- Shared Game Functions ---
+
+        function nextItem() {
+            if (gameState.gameType === 'words') {
+                generateWordBlend();
+            } else {
+                generateSound();
+            }
+            updateScore();
+        }
+
         function updateScore() {
             if (gameState.mode === 'challenge') {
                 gameState.score++;
                 currentScoreDisplay.textContent = gameState.score;
             }
-        }
-
-        function nextWord() {
-            generateWord();
-            updateScore();
         }
 
         function startTimer() {
@@ -332,44 +462,89 @@
             }, 1000);
         }
 
-        function startGame() {
-            // 1. Capture settings
-            gameState.mode = settings.getMode();
-            gameState.activePatterns = {
-                digraphs: settings.digraphs.checked,
-                floss: settings.floss.checked,
-                longConsonants: settings.longConsonants.checked,
-                initialBlends: settings.initialBlends.checked,
-                finalBlends: settings.finalBlends.checked,
-                silentE: settings.silentE.checked,
-                longVowels: settings.longVowels.checked,
-            };
-
-            // 2. Reset score and timer
+        function setupGameUI() {
+            // 1. Reset score and timer
             gameState.score = 0;
             clearInterval(gameState.timerId);
 
+            // 2. Load correct high score
+            const highScoreKey = gameState.gameType === 'words' ? 'soundsInABlenderWordHighScore' : 'soundsInABlenderSoundHighScore';
+            gameState.highScore = localStorage.getItem(highScoreKey) || 0;
+
             // 3. UI updates
-            setupScreen.classList.add('hidden');
+            gameModeScreen.classList.add('hidden');
+            wordSetupScreen.classList.add('hidden');
+            soundSetupScreen.classList.add('hidden');
             gameOverScreen.classList.add('hidden');
             gameScreen.classList.remove('hidden');
 
             if (gameState.mode === 'challenge') {
                 challengeHeader.classList.remove('hidden');
-            challengeHeader.classList.add('flex'); // re-add flex for proper layout
-            highScoreDisplay.textContent = gameState.highScore;
-            currentScoreDisplay.textContent = gameState.score;
-            startTimer();
-            switchToChallengeBtn.classList.add('hidden');
-            switchToPracticeBtn.classList.remove('hidden');
-        } else {
-            challengeHeader.classList.add('hidden');
-            switchToChallengeBtn.classList.remove('hidden');
-            switchToPracticeBtn.classList.add('hidden');
+                challengeHeader.classList.add('flex'); // re-add flex for proper layout
+                highScoreDisplay.textContent = gameState.highScore;
+                currentScoreDisplay.textContent = gameState.score;
+                startTimer();
+                switchToChallengeBtn.classList.add('hidden');
+                switchToPracticeBtn.classList.remove('hidden');
+            } else {
+                challengeHeader.classList.add('hidden');
+                switchToChallengeBtn.classList.remove('hidden');
+                switchToPracticeBtn.classList.add('hidden');
+            }
         }
 
-        // 4. Generate first word
-        generateWord();
+        function startWordGame() {
+            gameState.gameType = 'words';
+            gameState.mode = wordSettings.getMode();
+            gameState.activeWordPatterns = {
+                digraphs: wordSettings.digraphs.checked,
+                floss: wordSettings.floss.checked,
+                longConsonants: wordSettings.longConsonants.checked,
+                initialBlends: wordSettings.initialBlends.checked,
+                finalBlends: wordSettings.finalBlends.checked,
+                silentE: wordSettings.silentE.checked,
+                longVowels: wordSettings.longVowels.checked,
+            };
+
+            // Re-style game screen for 4 boxes
+            gameBoxesContainer.classList.remove('grid-cols-1');
+            gameBoxesContainer.classList.add('grid-cols-4');
+
+            // Reset box colors
+            boxes[0].className = 'bg-yellow-200 text-yellow-800 rounded-2xl flex items-center justify-center aspect-square flashcard';
+            boxes[1].className = 'bg-blue-200 text-blue-800 rounded-2xl flex items-center justify-center aspect-square flashcard';
+            boxes[2].className = 'bg-pink-200 text-pink-800 rounded-2xl flex items-center justify-center aspect-square flashcard';
+            boxes[3].className = 'bg-purple-200 text-purple-800 rounded-2xl flex items-center justify-center aspect-square flashcard';
+
+            setupGameUI();
+            generateWordBlend();
+        }
+
+        function startSoundGame() {
+            gameState.gameType = 'sounds';
+            gameState.mode = soundSettings.getMode();
+            
+            // Build the sound pool
+            let pool = [];
+            if (soundSettings.bdpq.checked) pool.push(...patterns.sound_bdpq);
+            if (soundSettings.consonants.checked) pool.push(...patterns.sound_consonants);
+            if (soundSettings.shortVowels.checked) pool.push(...patterns.sound_shortVowels);
+            if (soundSettings.commonLongVowels.checked) pool.push(...patterns.sound_commonLongVowels);
+            if (soundSettings.rControlled.checked) pool.push(...patterns.sound_rControlled);
+            if (soundSettings.lessCommonVowels.checked) pool.push(...patterns.sound_lessCommonVowels);
+            
+            // Remove duplicates
+            gameState.activeSoundPool = [...new Set(pool)];
+            
+            // Re-style game screen for 1 box (by hiding the container and showing one box)
+            gameBoxesContainer.classList.remove('grid-cols-4');
+            gameBoxesContainer.classList.add('grid-cols-1');
+
+            // Set a pleasant color for the single sound flashcard
+            boxes.forEach(box => box.className = `bg-green-200 text-green-800 rounded-2xl flex items-center justify-center aspect-square flashcard hidden`);
+
+            setupGameUI();
+            generateSound();
         }
         
         function endGame() {
@@ -378,7 +553,8 @@
             // Update high score if needed
             if (gameState.score > gameState.highScore) {
                 gameState.highScore = gameState.score;
-                localStorage.setItem('soundsInABlenderHighScore', gameState.highScore);
+                const highScoreKey = gameState.gameType === 'words' ? 'soundsInABlenderWordHighScore' : 'soundsInABlenderSoundHighScore';
+                localStorage.setItem(highScoreKey, gameState.highScore);
             }
 
             // Update display
@@ -392,25 +568,44 @@
 
         function resetToSetup() {
             gameOverScreen.classList.add('hidden');
-            setupScreen.classList.remove('hidden');
+            gameModeScreen.classList.remove('hidden');
         }
 
         function backToMenu() {
             clearInterval(gameState.timerId);
             gameScreen.classList.add('hidden');
-            setupScreen.classList.remove('hidden');
+            gameModeScreen.classList.remove('hidden');
         }
 
         function switchMode(newMode) {
             clearInterval(gameState.timerId);
-            // Set the radio button on the setup screen so startGame() picks it up
-            document.querySelector(`input[name="mode"][value="${newMode}"]`).checked = true;
-            startGame();
+            gameState.mode = newMode;
+            
+            // Set the radio button on the correct setup screen
+            if(gameState.gameType === 'words') {
+                document.querySelector(`input[name="word-mode"][value="${newMode}"]`).checked = true;
+                startWordGame();
+            } else {
+                document.querySelector(`input[name="sound-mode"][value="${newMode}"]`).checked = true;
+                startSoundGame();
+            }
         }
 
         // Event Listeners
-        startGameBtn.addEventListener('click', startGame);
-        nextWordBtn.addEventListener('click', nextWord);
+        selectSoundsGameBtn.addEventListener('click', () => {
+            gameModeScreen.classList.add('hidden');
+            soundSetupScreen.classList.remove('hidden');
+        });
+
+        selectWordsGameBtn.addEventListener('click', () => {
+            gameModeScreen.classList.add('hidden');
+            wordSetupScreen.classList.remove('hidden');
+        });
+
+        startWordGameBtn.addEventListener('click', startWordGame);
+        startSoundGameBtn.addEventListener('click', startSoundGame);
+        
+        nextBtn.addEventListener('click', nextItem);
         playAgainBtn.addEventListener('click', resetToSetup);
         backToMenuBtn.addEventListener('click', backToMenu);
         switchToChallengeBtn.addEventListener('click', () => switchMode('challenge'));
@@ -419,19 +614,4 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
