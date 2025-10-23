@@ -42,6 +42,9 @@
             font-size: clamp(2rem, 8vw, 4rem);
             padding: 2rem 1rem;
         }
+        .sound-flashcard {
+            font-size: clamp(3rem, 25vw, 10rem) !important; /* Override base flashcard font size */
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
@@ -510,7 +513,7 @@
             gameBoxesContainer.classList.remove('grid-cols-1');
             gameBoxesContainer.classList.add('grid-cols-4');
 
-            // Reset box colors
+            // Reset box colors and remove sound-flashcard class
             boxes[0].className = 'bg-yellow-200 text-yellow-800 rounded-2xl flex items-center justify-center aspect-square flashcard';
             boxes[1].className = 'bg-blue-200 text-blue-800 rounded-2xl flex items-center justify-center aspect-square flashcard';
             boxes[2].className = 'bg-pink-200 text-pink-800 rounded-2xl flex items-center justify-center aspect-square flashcard';
@@ -541,7 +544,7 @@
             gameBoxesContainer.classList.add('grid-cols-1');
 
             // Set a pleasant color for the single sound flashcard
-            boxes.forEach(box => box.className = `bg-green-200 text-green-800 rounded-2xl flex items-center justify-center aspect-square flashcard hidden`);
+            boxes.forEach(box => box.className = `bg-green-200 text-green-800 rounded-2xl flex items-center justify-center aspect-square flashcard sound-flashcard hidden max-w-xs mx-auto`);
 
             setupGameUI();
             generateSound();
@@ -614,4 +617,5 @@
     </script>
 </body>
 </html>
+
 
